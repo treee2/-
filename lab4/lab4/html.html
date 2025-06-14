@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Битмап крестика 24x24</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            background: #1a1a1a;
+            color: #ffffff;
+            padding: 20px;
+            margin: 0;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #ff6b6b;
+            margin-bottom: 30px;
+        }
+        
+        .bitmap-container {
+            display: flex;
+            gap: 40px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 40px;
+        }
+        
+        .bitmap-visual {
+            background: #333;
+            padding: 20px;
+            border-radius: 8px;
+            border: 2px solid #555;
+        }
+        
+        .bitmap-grid {
+            display: grid;
+            grid-template-columns: repeat(24, 1fr);
+            gap: 1px;
+            background: #222;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+        
+        .pixel {
+            width: 12px;
+            height: 12px;
+            border: 0.5px solid #444;
+            transition: all 0.2s ease;
+        }
+        
+        .pixel.on {
+            background: #ff4444;
+            box-shadow: 0 0 4px rgba(255, 68, 68, 0.5);
+        }
+        
+        .pixel.off {
+            background: #111;
+        }
+        
+        .pixel:hover {
+            transform: scale(1.2);
+            z-index: 10;
+            position: relative;
+            border-color: #fff;
+        }
+        
+        .data-display {
+            background: #2a2a2a;
+            padding: 20px;
+            border-radius: 8px;
+            border: 2px solid #555;
+            overflow-x: auto;
+        }
+        
+        .hex-row {
+            margin: 5px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .row-label {
+            color: #888;
+            min-width: 60px;
+        }
+        
+        .hex-bytes {
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            color: #4CAF50;
+        }
+        
+        .binary-display {
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            color: #81C784;
+            margin-left: 20px;
+        }
+        
+        .controls {
+            text-align: center;
+            margin: 30px 0;
+        }
+        
+        button {
+            background: #ff4444;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 0 10px;
+            font-size: 14px;
+            transition: background 0.3s ease;
+        }
+        
+        button:hover {
+            background: #ff6666;
+        }
+        
+        .stats {
+            background: #2a2a2a;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #ff4444;
+            margin-top: 20px;
+        }
+        
+        .opengl-code {
+            background: #1e1e1e;
+            border: 1px solid #555;
+            border-radius: 4px;
+            padding: 15px;
+            margin-top: 20px;
+            overflow-x: auto;
+        }
+        
+        .opengl-code code {
+            color: #d4d4d4;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+        
+        .comment {
+            color: #6A9955;
+        }
+        
+        .keyword {
+            color: #569CD6;
+        }
+        
+        .number {
+            color: #B5CEA8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Битмап крестика 24×24 пикселя</h1>
+        
+        <div class="bitmap-container">
+            <div class="bitmap-visual">
+                <h3>Визуальное представление</h3>
+                <div class="bitmap-grid" id="bitmapGrid"></div>
+                <div class="controls">
+                    <button onclick="animatePattern()">Анимировать</button>
+                    <button onclick="toggleGrid()">Сетка</button>
+                    <button onclick="exportPattern()">Экспорт</button>
+                </div>
+            </div>
+            
+            <div class="data-display">
+                <h3>Hex данные (72 байта)</h3>
+                <div id="hexData"></div>
+                
+                <div class="stats">
+                    <strong>Статистика:</strong><br>
+                    Размер: 24×24 пикселя<br>
+                    Байт на строку: 3<br>
+                    Всего байт: 72<br>
+                    Включенных пикселей: <span id="pixelCount">0</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="opengl-code">
+            <h3>OpenGL код</h3>
+            <code>
+<span class="comment">// Битмап крестика 24x24 для OpenGL</span><br>
+<span class="keyword">GLubyte</span> correctedCross24[<span class="number">72</span>] = {<br>
+<span id="glCode"></span>
+};<br><br>
+<span class="comment">// Использование:</span><br>
+<span class="keyword">glPixelStorei</span>(GL_UNPACK_ALIGNMENT, <span class="number">1</span>);<br>
+<span class="keyword">glBitmap</span>(<span class="number">24</span>, <span class="number">24</span>, <span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">0.0</span>, correctedCross24);
+            </code>
+        </div>
+    </div>
+
+    <script>
+        // Данные битмапа крестика
+        const bitmapData = [
+            0x00,0x00,0x00,  // строка 0
+            0x00,0x00,0x00,  // строка 1
+            0x00,0x00,0x00,  // строка 2
+            0x00,0x00,0x00,  // строка 3
+            0x00,0x00,0x00,  // строка 4
+            0x00,0x18,0x00,  // строка 5
+            0x00,0x18,0x00,  // строка 6
+            0x00,0x18,0x00,  // строка 7
+            0x00,0x18,0x00,  // строка 8
+            0x00,0x18,0x00,  // строка 9
+            0x00,0x18,0x00,  // строка 10
+            0x07,0xFF,0xE0,  // строка 11 - горизонтальная линия
+            0x00,0x18,0x00,  // строка 12
+            0x00,0x18,0x00,  // строка 13
+            0x00,0x18,0x00,  // строка 14
+            0x00,0x18,0x00,  // строка 15
+            0x00,0x18,0x00,  // строка 16
+            0x00,0x18,0x00,  // строка 17
+            0x00,0x18,0x00,  // строка 18
+            0x00,0x00,0x00,  // строка 19
+            0x00,0x00,0x00,  // строка 20
+            0x00,0x00,0x00,  // строка 21
+            0x00,0x00,0x00,  // строка 22
+            0x00,0x00,0x00   // строка 23
+        ];
+
+        let gridVisible = true;
+        let animationRunning = false;
+
+        function createBitmapGrid() {
+            const grid = document.getElementById('bitmapGrid');
+            grid.innerHTML = '';
+            
+            let pixelCount = 0;
+            
+            // Создаем 24 строки по 24 пикселя
+            for (let row = 0; row < 24; row++) {
+                // Получаем 3 байта для этой строки
+                const byte1 = bitmapData[row * 3];
+                const byte2 = bitmapData[row * 3 + 1];
+                const byte3 = bitmapData[row * 3 + 2];
+                
+                // Объединяем в 24-битное число
+                const rowData = (byte1 << 16) | (byte2 << 8) | byte3;
+                
+                // Создаем пиксели для этой строки
+                for (let col = 0; col < 24; col++) {
+                    const pixel = document.createElement('div');
+                    pixel.className = 'pixel';
+                    
+                    // Проверяем бит (старший бит слева)
+                    const bitPosition = 23 - col;
+                    const isOn = (rowData >> bitPosition) & 1;
+                    
+                    if (isOn) {
+                        pixel.classList.add('on');
+                        pixelCount++;
+                    } else {
+                        pixel.classList.add('off');
+                    }
+                    
+                    pixel.title = `Строка ${row}, Столбец ${col}, Бит: ${isOn}`;
+                    grid.appendChild(pixel);
+                }
+            }
+            
+            document.getElementById('pixelCount').textContent = pixelCount;
+        }
+
+        function createHexDisplay() {
+            const hexContainer = document.getElementById('hexData');
+            const glCodeContainer = document.getElementById('glCode');
+            
+            let hexHtml = '';
+            let glCodeHtml = '';
+            
+            for (let i = 0; i < bitmapData.length; i += 3) {
+                const row = i / 3;
+                const byte1 = bitmapData[i];
+                const byte2 = bitmapData[i + 1];
+                const byte3 = bitmapData[i + 2];
+                
+                // Hex display
+                hexHtml += `<div class="hex-row">`;
+                hexHtml += `<span class="row-label">Строка ${row}:</span>`;
+                hexHtml += `<span class="hex-bytes">0x${byte1.toString(16).padStart(2, '0').toUpperCase()}, `;
+                hexHtml += `0x${byte2.toString(16).padStart(2, '0').toUpperCase()}, `;
+                hexHtml += `0x${byte3.toString(16).padStart(2, '0').toUpperCase()}</span>`;
+                
+                // Binary representation
+                const binary1 = byte1.toString(2).padStart(8, '0');
+                const binary2 = byte2.toString(2).padStart(8, '0');
+                const binary3 = byte3.toString(2).padStart(8, '0');
+                hexHtml += `<span class="binary-display">${binary1} ${binary2} ${binary3}</span>`;
+                hexHtml += `</div>`;
+                
+                // OpenGL code
+                glCodeHtml += `    <span class="number">0x${byte1.toString(16).padStart(2, '0').toUpperCase()}</span>,<span class="number">0x${byte2.toString(16).padStart(2, '0').toUpperCase()}</span>,<span class="number">0x${byte3.toString(16).padStart(2, '0').toUpperCase()}</span>,  <span class="comment">// строка ${row}</span><br>`;
+            }
+            
+            hexContainer.innerHTML = hexHtml;
+            glCodeContainer.innerHTML = glCodeHtml;
+        }
+
+        function toggleGrid() {
+            const pixels = document.querySelectorAll('.pixel');
+            gridVisible = !gridVisible;
+            
+            pixels.forEach(pixel => {
+                pixel.style.border = gridVisible ? '0.5px solid #444' : 'none';
+            });
+        }
+
+        function animatePattern() {
+            if (animationRunning) return;
+            
+            animationRunning = true;
+            const pixels = document.querySelectorAll('.pixel.on');
+            
+            pixels.forEach((pixel, index) => {
+                setTimeout(() => {
+                    pixel.style.transform = 'scale(1.5)';
+                    pixel.style.boxShadow = '0 0 20px rgba(255, 68, 68, 0.8)';
+                    
+                    setTimeout(() => {
+                        pixel.style.transform = 'scale(1)';
+                        pixel.style.boxShadow = '0 0 4px rgba(255, 68, 68, 0.5)';
+                    }, 200);
+                }, index * 50);
+            });
+            
+            setTimeout(() => {
+                animationRunning = false;
+            }, pixels.length * 50 + 500);
+        }
+
+        function exportPattern() {
+            const data = bitmapData.map(byte => `0x${byte.toString(16).padStart(2, '0').toUpperCase()}`).join(', ');
+            
+            const exportText = `GLubyte correctedCross24[72] = {\n    ${data}\n};`;
+            
+            navigator.clipboard.writeText(exportText).then(() => {
+                alert('Код скопирован в буфер обмена!');
+            }).catch(() => {
+                // Fallback для старых браузеров
+                const textarea = document.createElement('textarea');
+                textarea.value = exportText;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                alert('Код скопирован в буфер обмена!');
+            });
+        }
+
+        // Инициализация
+        document.addEventListener('DOMContentLoaded', () => {
+            createBitmapGrid();
+            createHexDisplay();
+        });
+    </script>
+</body>
+</html>

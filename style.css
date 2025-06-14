@@ -1,0 +1,33 @@
+body {
+  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif, sans-serif;
+  margin: 20px;
+  padding: 180px;
+  background-color: #f4f4f4;
+  font-size: 18px; /* Добавлен размер шрифта */
+}
+
+
+main {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  color: dimgray;
+}
+
+table, th, td {
+  border: 1px solid dimgray;
+  padding: 10px;
+  text-align: left;
+}
+
+th {
+  background-color: #ddd;
+}
+

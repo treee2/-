@@ -1,0 +1,147 @@
+<!-- Создать макет статической информационной страницы. Добавить 
+вертикальное меню, расположенное в левой части страницы. Разработать 
+компонент «раскрывающееся меню». Меню расположено вертикально. При 
+раскрытии пункта меню последующие за ним пункты смещаются вниз. -->
+
+
+<!DOCTYPE html> 
+<html lang="en"> 
+<head> 
+    <meta charset="UTF-8"> 
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+    <title>Статическая информационная страница</title> 
+    <style>
+            body { 
+        background-color: #f0f0f0;
+        background-image: url('абобус.png'); 
+        background-repeat: no-repeat; 
+        background-position: center; 
+        background-size: cover; 
+        margin: 0; 
+        padding: 0; 
+        font-family: Arial, sans-serif; 
+        min-height: 100vh; 
+        position: relative;
+    } 
+
+    #sidebarToggle {
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        z-index: 1001;
+        background: #333;
+        color: white;
+        border: none;
+        padding: 10px 15px;
+        font-size: 24px;
+        cursor: pointer;
+        border-radius: 5px;
+        transition: background-color 0.3s;
+    }
+
+    #sidebarToggle:hover {
+        background: #444;
+    }
+    
+    #sidebar { 
+        position: fixed; 
+        top: 0; 
+        left: -300px; 
+        width: 300px; 
+        height: 100vh; 
+        background-color: #333; 
+        color: #fff; 
+        overflow-y: auto;
+        z-index: 1000;
+        box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+        transition: left 0.3s ease-in-out;
+    } 
+
+    #sidebar.sidebar-open {
+        left: 0;
+    }
+    
+    #sidebar ul { 
+        margin: 0; 
+        padding: 20px 0;
+        list-style: none;
+        font-size: 20px;
+        font-weight: 500;
+        letter-spacing: 1px;
+    } 
+    
+    #sidebar ul li { 
+        padding: 15px 80px;
+    } 
+    
+    #sidebar ul li a { 
+        color: #fff; 
+        text-decoration: none; 
+        display: block;
+    } 
+    
+    #sidebar ul li.has-submenu > a { 
+        display: block; 
+    } 
+    
+    #sidebar ul li.has-submenu .submenu { 
+        display: none;
+        padding-left: 20px;
+        margin-top: 10px;
+    } 
+
+    #content { 
+        margin-left: 20px;
+        padding: 20px;
+        position: relative;
+        min-height: 100vh;
+        box-sizing: border-box;
+        transition: margin-left 0.3s ease-in-out;
+    }
+
+    #content.sidebar-open {
+        margin-left: 320px;
+    }
+
+    h1, p {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: auto;
+        padding: 100px;
+    }
+    </style>
+</head> 
+<body> 
+    <button id="sidebarToggle">☰</button>
+    <nav id="sidebar" class="sidebar-closed"> 
+        <ul id="menu"> 
+            <li class="has-submenu"> 
+                <a href="#">Пункт меню 1</a> 
+                <ul class="submenu"> 
+                    <li><a href="#">1.1</a></li> 
+                    <li><a href="#">1.2</a></li> 
+                </ul> 
+            </li> 
+            <li class="has-submenu"> 
+                <a href="#">Пункт меню 2</a> 
+                <ul class="submenu"> 
+                    <li><a href="#">2.1</a></li> 
+                    <li><a href="#">2.2</a></li> 
+                </ul> 
+            </li> 
+            <li class="has-submenu"> 
+                <a href="#">Пункт меню 3</a> 
+                <ul class="submenu"> 
+                    <li><a href="#">3.1</a></li> 
+                    <li><a href="#">3.2</a></li> 
+                </ul> 
+            </li> 
+        </ul> 
+    </nav> 
+    <main id="content"> 
+        <h1>Добро пожаловать на нашу страницу!</h1> 
+    </main> 
+    <script src="web5.js"></script> 
+</body> 
+</html>
